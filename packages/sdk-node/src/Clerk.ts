@@ -36,6 +36,7 @@ export type RequireSessionProp<T> = T & { session: Session };
 export type WithSessionClaimsProp<T> = T & { sessionClaims?: JwtPayload };
 export type RequireSessionClaimsProp<T> = T & { sessionClaims: JwtPayload };
 
+import { Tracer } from '@clerk/tracer';
 import { Crypto, CryptoKey } from '@peculiar/webcrypto';
 
 import { decodeBase64, toSPKIDer } from './utils/crypto';
@@ -107,6 +108,14 @@ export default class Clerk extends ClerkBackendAPI {
       fetcher,
     });
 
+    Tracer.init({
+      enable: true,
+      apiKey,
+      apiVersion,
+      libName: LIB_NAME,
+      libVersion: LIB_VERSION,
+    });
+
     if (!apiKey) {
       throw Error(SupportMessages.API_KEY_NOT_FOUND);
     }
@@ -156,7 +165,10 @@ export default class Clerk extends ClerkBackendAPI {
     );
   }
 
-  async verifyToken(token: string, authorizedParties?: string[]): Promise<JwtPayload> {
+  async verifyToken(
+    token: string,
+    authorizedParties?: string[]
+  ): Promise<JwtPayload> {
     const decoded = jwt.decode(token, { complete: true });
     if (!decoded) {
       throw new Error(`Failed to verify token: ${token}`);
@@ -216,7 +228,9 @@ export default class Clerk extends ClerkBackendAPI {
   }
 
   expressWithSession(
-    { onError, authorizedParties }: MiddlewareOptions = { onError: this.defaultOnError }
+    { onError, authorizedParties }: MiddlewareOptions = {
+      onError: this.defaultOnError,
+    }
   ): (req: Request, res: Response, next: NextFunction) => Promise<void> {
     function signedOut() {
       throw new Error('Unauthenticated');
@@ -283,7 +297,9 @@ export default class Clerk extends ClerkBackendAPI {
   }
 
   expressRequireSession(
-    { onError, authorizedParties }: MiddlewareOptions = { onError: this.strictOnError }
+    { onError, authorizedParties }: MiddlewareOptions = {
+      onError: this.strictOnError,
+    }
   ) {
     return this.expressWithSession({ onError, authorizedParties });
   }
@@ -308,7 +324,9 @@ export default class Clerk extends ClerkBackendAPI {
   // Set the session on the request and then call provided handler
   withSession(
     handler: Function,
-    { onError, authorizedParties }: MiddlewareOptions = { onError: this.defaultOnError }
+    { onError, authorizedParties }: MiddlewareOptions = {
+      onError: this.defaultOnError,
+    }
   ) {
     return async (
       req: WithSessionProp<Request> | WithSessionClaimsProp<Request>,
@@ -340,7 +358,9 @@ export default class Clerk extends ClerkBackendAPI {
   // Stricter version, short-circuits if session can't be determined
   requireSession(
     handler: Function,
-    { onError, authorizedParties }: MiddlewareOptions = { onError: this.strictOnError }
+    { onError, authorizedParties }: MiddlewareOptions = {
+      onError: this.strictOnError,
+    }
   ) {
     return this.withSession(handler, { onError, authorizedParties });
   }

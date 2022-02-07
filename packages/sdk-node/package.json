@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "@clerk/backend-core": "^0.4.0",
+    "@clerk/tracer": "^0.0.1",
     "@peculiar/webcrypto": "^1.2.3",
     "camelcase-keys": "^6.2.2",
     "cookies": "^0.8.0",
