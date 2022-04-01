@@ -24,7 +24,8 @@
     "edge-middleware.js",
     "edge-middleware.d.ts",
     "ssr.d.ts",
-    "ssr.js"
+    "ssr.js",
+    "api"
   ],
   "scripts": {
     "prepublishOnly": "npm run build",
