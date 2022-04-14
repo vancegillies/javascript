@@ -13,31 +13,31 @@ export type ServerSideAuth = {
 
 type SsrSessionState<SessionType> =
   | {
-      sessionId: null;
-      session: null;
-    }
+    sessionId: null;
+    session: null;
+  }
   | {
-      sessionId: string;
-      session: SessionType | undefined;
-    };
+    sessionId: string;
+    session: SessionType | undefined;
+  };
 
 type SsrUserState<UserType> =
   | {
-      userId: null;
-      user: null;
-    }
+    userId: null;
+    user: null;
+  }
   | {
-      userId: string;
-      user: UserType | undefined;
-    };
+    userId: string;
+    user: UserType | undefined;
+  };
 
 export type SsrAuthData = SsrSessionState<SessionResource> & SsrUserState<UserResource>;
 export type ClerkSsrState = SsrSessionState<SessionJSON> & SsrUserState<UserJSON>;
 export type InitialState =
   | {
-      user: undefined;
-      userId: undefined;
-      session: undefined;
-      sessionId: undefined;
-    }
+    user: undefined;
+    userId: undefined;
+    session: undefined;
+    sessionId: undefined;
+  }
   | (SsrSessionState<SessionJSON> & SsrUserState<UserJSON>);
