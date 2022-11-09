@@ -2,6 +2,7 @@ import React from 'react';
 
 import { useAppearance } from '../customizables';
 import { Form } from '../elements';
+import { WalletConnectButton } from '../elements/SignInWithWalletConnectButton';
 import { FormControlState } from '../utils';
 import { ActiveIdentifier, Fields } from './signUpFormHelpers';
 
@@ -100,6 +101,7 @@ export const SignUpForm = (props: SignUpFormProps) => {
         </Form.ControlRow>
       )}
       <Form.SubmitButton>Continue</Form.SubmitButton>
+      <WalletConnectButton />
     </Form.Root>
   );
 };
