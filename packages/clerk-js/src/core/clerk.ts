@@ -91,6 +91,7 @@ declare global {
     Clerk?: Clerk;
     __clerk_frontend_api?: string;
     __clerk_publishable_key?: string;
+    __clerk_proxy_url?: Pick<ClerkInterface, 'proxyUrl'>['proxyUrl'];
   }
 }
 
@@ -109,6 +110,7 @@ export default class Clerk implements ClerkInterface {
   public user?: UserResource | null;
   public frontendApi: string;
   public publishableKey?: string;
+  public proxyUrl;
 
   #authService: AuthenticationService | null = null;
   #broadcastChannel: LocalStorageBroadcastChannel<ClerkCoreBroadcastChannelEvent> | null = null;
@@ -132,15 +134,17 @@ export default class Clerk implements ClerkInterface {
     return this.#isReady;
   }
 
-  public constructor(key: string) {
+  public constructor(key: string, options?: Pick<ClerkInterface, 'proxyUrl'>) {
     key = (key || '').trim();
+
+    this.proxyUrl = options?.proxyUrl;
 
     if (isLegacyFrontendApiKey(key)) {
       if (!validateFrontendApi(key)) {
         errorThrower.throwInvalidFrontendApiError({ key });
       }
 
-      this.frontendApi = key;
+      this.frontendApi = options?.proxyUrl || key;
       this.#instanceType = isDevOrStagingUrl(this.frontendApi) ? 'development' : 'production';
     } else {
       const publishableKey = parsePublishableKey(key);
@@ -151,7 +155,7 @@ export default class Clerk implements ClerkInterface {
 
       const { frontendApi, instanceType } = publishableKey as PublishableKey;
 
-      this.frontendApi = frontendApi;
+      this.frontendApi = options?.proxyUrl || frontendApi;
       this.#instanceType = instanceType;
     }
     this.#fapiClient = createFapiClient(this);
