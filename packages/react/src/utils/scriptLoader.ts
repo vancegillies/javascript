@@ -65,13 +65,14 @@ export type ScriptVariant = '' | 'headless';
 export interface LoadScriptParams {
   frontendApi?: string;
   publishableKey?: string;
+  proxyUrl?: string;
   scriptUrl?: string;
   scriptVariant?: ScriptVariant;
 }
 
 export async function loadScript(params: LoadScriptParams): Promise<HTMLScriptElement | null> {
   return new Promise((resolve, reject) => {
-    const { frontendApi, publishableKey } = params;
+    const { frontendApi, publishableKey, proxyUrl } = params;
 
     if (global.Clerk) {
       resolve(null);
@@ -88,7 +89,9 @@ export async function loadScript(params: LoadScriptParams): Promise<HTMLScriptEl
     } else if (frontendApi) {
       script.setAttribute('data-clerk-frontend-api', frontendApi);
     }
-
+    if (proxyUrl) {
+      script.setAttribute('data-clerk-proxy-url', proxyUrl);
+    }
     script.setAttribute('crossorigin', 'anonymous');
     script.async = true;
 
