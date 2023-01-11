@@ -49,6 +49,7 @@ export function ClerkProvider(props: React.PropsWithChildren<{ initialState: any
     <ReactClerkProvider
       frontendApi={process.env.NEXT_PUBLIC_CLERK_FRONTEND_API || ''}
       publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || ''}
+      proxyUrl={process.env.NEXT_PUBLIC_CLERK_PROXY_URL || ''}
       navigate={navigate}
       initialState={initialState}
     >
