@@ -1,6 +1,7 @@
 import type {
   ActiveSessionResource,
   AuthenticateWithMetamaskParams,
+  Clerk as ClerkInterface,
   ClientResource,
   CreateOrganizationParams,
   CreateOrganizationProps,
@@ -47,6 +48,7 @@ export default class IsomorphicClerk {
   private mode: 'browser' | 'server';
   private frontendApi?: string;
   private publishableKey?: string;
+  private proxyUrl?: Pick<ClerkInterface, 'proxyUrl'>['proxyUrl'];
   private options: IsomorphicClerkOptions;
   private Clerk: ClerkProp;
   private clerkjs: BrowserClerk | HeadlessBrowserClerk | null = null;
@@ -83,9 +85,10 @@ export default class IsomorphicClerk {
   }
 
   constructor(options: IsomorphicClerkOptions) {
-    const { Clerk = null, frontendApi, publishableKey, ...rest } = options || {};
+    const { Clerk = null, frontendApi, publishableKey, proxyUrl } = options || {};
     this.frontendApi = frontendApi;
     this.publishableKey = publishableKey;
+    this.proxyUrl = proxyUrl;
     this.options = options;
     this.Clerk = Clerk;
     this.mode = inClientSide() ? 'browser' : 'server';
@@ -109,6 +112,7 @@ export default class IsomorphicClerk {
     // - https://github.com/facebook/react/issues/24430
     window.__clerk_frontend_api = this.frontendApi;
     window.__clerk_publishable_key = this.publishableKey;
+    window.__clerk_proxy_url = this.proxyUrl;
 
     try {
       if (this.Clerk) {
@@ -117,7 +121,9 @@ export default class IsomorphicClerk {
 
         if (isConstructor<BrowserClerkConstructor | HeadlessBrowserClerkConstrutor>(this.Clerk)) {
           // Construct a new Clerk object if a constructor is passed
-          c = new this.Clerk(this.publishableKey || this.frontendApi || '');
+          c = new this.Clerk(this.publishableKey || this.frontendApi || '', {
+            proxyUrl: this.proxyUrl,
+          });
           await c.load(this.options);
         } else {
           // Otherwise use the instantiated Clerk object
@@ -134,6 +140,7 @@ export default class IsomorphicClerk {
         await loadScript({
           frontendApi: this.frontendApi,
           publishableKey: this.publishableKey,
+          proxyUrl: this.proxyUrl,
           scriptUrl: this.options.clerkJSUrl,
           scriptVariant: this.options.clerkJSVariant,
         });
