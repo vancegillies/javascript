@@ -17,10 +17,6 @@ const proxyUrl =
   window.__clerk_proxy_url ||
   '';
 
-if (publishableKey && frontendApi) {
-  console.warn('Both publishableKey and frontendApi are set. Using publishableKey.');
-}
-
 window.Clerk = new Clerk(publishableKey || frontendApi, {
   proxyUrl,
 });

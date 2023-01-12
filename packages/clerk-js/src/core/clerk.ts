@@ -144,7 +144,7 @@ export default class Clerk implements ClerkInterface {
         errorThrower.throwInvalidFrontendApiError({ key });
       }
 
-      this.frontendApi = options?.proxyUrl || key;
+      this.frontendApi = key;
       this.#instanceType = isDevOrStagingUrl(this.frontendApi) ? 'development' : 'production';
     } else {
       const publishableKey = parsePublishableKey(key);
@@ -155,7 +155,7 @@ export default class Clerk implements ClerkInterface {
 
       const { frontendApi, instanceType } = publishableKey as PublishableKey;
 
-      this.frontendApi = options?.proxyUrl || frontendApi;
+      this.frontendApi = frontendApi;
       this.#instanceType = instanceType;
     }
     this.#fapiClient = createFapiClient(this);
