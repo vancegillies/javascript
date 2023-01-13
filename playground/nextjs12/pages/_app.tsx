@@ -1,7 +1,7 @@
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
 
-import { ClerkProvider, OrganizationSwitcher, SignInButton, UserButton } from '@clerk/nextjs';
+import { ClerkProvider, OrganizationSwitcher, SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
 import { dark, neobrutalism, shadesOfPurple } from '@clerk/themes';
 import Link from 'next/link';
 import React, { useState } from 'react';
@@ -25,6 +25,9 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <ClerkProvider
+      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || ''}
+      // @ts-expect-error
+      proxyUrl='playground.lclclerk.com/api/__clerk'
       appearance={{
         baseTheme: scheme === 'dark' ? themes.dark : themes[selectedTheme],
         variables: { colorPrimary: '#f85656' },
@@ -77,8 +80,12 @@ const AppBar = (props: AppBarProps) => {
         <option value='shadesOfPurple'>shadesOfPurple</option>
       </select>
       <button onClick={props.onToggleDark}>toggle dark mode</button>
-      <UserButton />
-      <SignInButton mode={'modal'} />
+      <SignedIn>
+        <UserButton />
+      </SignedIn>
+      <SignedOut>
+        <SignInButton mode={'modal'} />
+      </SignedOut>
     </div>
   );
 };
