@@ -1,3 +1,5 @@
+import { Clerk as ClerkInterface } from '@clerk/types';
+
 import {
   buildURL,
   createCookieHandler,
@@ -12,15 +14,19 @@ import { FapiClient } from './fapiClient';
 
 export interface DevBrowserHandler {
   clear(): Promise<void>;
+
   setup(): Promise<void>;
+
   getDevBrowserJWT(): string | null;
+
   setDevBrowserJWT(jwt: string): void;
+
   removeDevBrowserJWT(): void;
+
   isCookieless(): boolean;
 }
 
-export type CreateDevBrowserHandlerOptions = {
-  frontendApi: string;
+export type CreateDevBrowserHandlerOptions = Pick<ClerkInterface, 'proxyUrl' | 'frontendApi'> & {
   fapiClient: FapiClient;
 };
 

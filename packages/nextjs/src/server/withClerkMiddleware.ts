@@ -3,7 +3,7 @@ import { NextMiddleware, NextMiddlewareResult } from 'next/dist/server/web/types
 import { NextFetchEvent, NextRequest, NextResponse } from 'next/server';
 
 import { constants as nextConstants } from '../constants';
-import { API_KEY, API_URL, clerkClient, FRONTEND_API, PUBLISHABLE_KEY, SECRET_KEY } from './clerk';
+import { API_KEY, API_URL, clerkClient, FRONTEND_API, PROXY_URL, PUBLISHABLE_KEY, SECRET_KEY } from './clerk';
 import {
   getCookie,
   nextJsVersionCanOverrideRequestHeaders,
@@ -51,14 +51,13 @@ export const withClerkMiddleware: WithClerkMiddleware = (...args: unknown[]) => 
     // Note: there is currently no way to rewrite to a protected endpoint
     // Therefore we have to resort to a public interstitial endpoint
     if (requestState.isInterstitial || requestState.isUnknown) {
-      const response = NextResponse.rewrite(
-        clerkClient.remotePublicInterstitialUrl({
-          apiUrl: API_URL,
-          frontendApi: FRONTEND_API,
-          publishableKey: PUBLISHABLE_KEY,
-        }),
-        { status: 401 },
-      );
+      const rewriteUrl = clerkClient.remotePublicInterstitialUrl({
+        apiUrl: API_URL,
+        frontendApi: FRONTEND_API,
+        publishableKey: PUBLISHABLE_KEY,
+        // proxyUrl: PROXY_URL,
+      });
+      const response = NextResponse.rewrite(rewriteUrl, { status: 401 });
       response.headers.set(constants.Headers.AuthReason, requestState.reason);
       response.headers.set(constants.Headers.AuthMessage, requestState.message);
       return response;

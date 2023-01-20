@@ -6,6 +6,7 @@ export const API_KEY = process.env.CLERK_API_KEY || '';
 export const SECRET_KEY = process.env.CLERK_SECRET_KEY || '';
 export const FRONTEND_API = process.env.NEXT_PUBLIC_CLERK_FRONTEND_API || '';
 export const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
+export const PROXY_URL = process.env.NEXT_PUBLIC_CLERK_PROXY_URL || '';
 
 const clerkClient = Clerk({
   apiKey: API_KEY,

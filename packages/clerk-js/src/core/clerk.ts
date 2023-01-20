@@ -155,6 +155,7 @@ export default class Clerk implements ClerkInterface {
 
       const { frontendApi, instanceType } = publishableKey as PublishableKey;
 
+      this.publishableKey = key;
       this.frontendApi = frontendApi;
       this.#instanceType = instanceType;
     }
@@ -939,6 +940,7 @@ export default class Clerk implements ClerkInterface {
     this.#pageLifecycle = createPageLifecycle();
 
     this.#devBrowserHandler = createDevBrowserHandler({
+      proxyUrl: this.proxyUrl,
       frontendApi: this.frontendApi,
       fapiClient: this.#fapiClient,
     });
