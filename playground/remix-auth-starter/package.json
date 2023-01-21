@@ -1,0 +1,51 @@
+{
+  "name": "remix-auth-starter",
+  "private": true,
+  "description": "Add sign up, sign in, profile management, and authenticated API routes to your Remix application with the Remix Auth Starter by Clerk.",
+  "keywords": [
+    "remix",
+    "auth",
+    "starter",
+    "clerk",
+    "react"
+  ],
+  "author": "Clerk, Inc.",
+  "license": "MIT",
+  "homepage": "https://github.com/clerkinc/remix-auth-starter",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/clerkinc/remix-auth-starter"
+  },
+  "scripts": {
+    "build": "remix build",
+    "dev": "PORT=4011 remix dev",
+    "start": "PORT=4011 CLERK_JS=https://js.lclclerk.com/npm/clerk.browser.js CLERK_PUBLISHABLE_KEY=pk_test_cHVtcGVkLXR1bmEtNjMuY2xlcmsuYWNjb3VudHMubGNsY2xlcmsuY29tJA CLERK_SECRET_KEY=sk_test_QUAONEeO1DTMGRMMnGuBaVow5BYAYs1PG4maV6ugJt remix-serve build",
+    "yalc:add": "yalc add @clerk/types && yalc add @clerk/remix && yalc add @clerk/backend && yalc add @clerk/clerk-react",
+    "yalc:update": "yalc update @clerk/types && yalc update @clerk/remix && yalc update @clerk/backend && yalc update @clerk/clerk-react"
+  },
+  "dependencies": {
+    "@clerk/backend": "file:.yalc/@clerk/backend",
+    "@clerk/remix": "file:.yalc/@clerk/remix",
+    "@clerk/clerk-react": "file:.yalc/@clerk/clerk-react",
+    "@clerk/types": "file:.yalc/@clerk/types",
+    "@remix-run/node": "^1.11.0",
+    "@remix-run/react": "^1.11.0",
+    "@remix-run/vercel": "^1.11.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@remix-run/dev": "^1.11.0",
+    "@remix-run/eslint-config": "^1.11.0",
+    "@remix-run/serve": "^1.11.0",
+    "@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.10",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.9.0",
+    "prettier": "^2.8.3",
+    "typescript": "^4.9.4"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}
