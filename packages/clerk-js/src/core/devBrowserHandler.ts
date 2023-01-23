@@ -1,3 +1,5 @@
+import { Clerk } from '@clerk/types';
+
 import {
   buildURL,
   createCookieHandler,
@@ -12,14 +14,19 @@ import { FapiClient } from './fapiClient';
 
 export interface DevBrowserHandler {
   clear(): Promise<void>;
+
   setup(): Promise<void>;
+
   getDevBrowserJWT(): string | null;
+
   setDevBrowserJWT(jwt: string): void;
+
   removeDevBrowserJWT(): void;
+
   isCookieless(): boolean;
 }
 
-export type CreateDevBrowserHandlerOptions = {
+export type CreateDevBrowserHandlerOptions = Pick<Clerk, 'proxyUrl'> & {
   frontendApi: string;
   fapiClient: FapiClient;
 };
@@ -27,6 +34,7 @@ export type CreateDevBrowserHandlerOptions = {
 // export type DevBrowserHandler = ReturnType<typeof createDevBrowserHandler>;
 export default function createDevBrowserHandler({
   frontendApi,
+  proxyUrl,
   fapiClient,
 }: CreateDevBrowserHandlerOptions): DevBrowserHandler {
   const cookieHandler = createCookieHandler();
@@ -67,21 +75,42 @@ export default function createDevBrowserHandler({
     cookieHandler.setDevBrowserInittedCookie();
   }
 
+  function getBuildUrlArgs({
+    fapiOrigin,
+    proxyUrl,
+  }: Pick<CreateDevBrowserHandlerOptions, 'proxyUrl'> & { fapiOrigin: string }) {
+    const origin = window.location.origin;
+    const redirect = window.location.href;
+
+    if (proxyUrl) {
+      const proxyBase = new URL(`https://${proxyUrl}`);
+      const proxyPath = proxyBase.pathname.slice(1, proxyBase.pathname.length);
+      return {
+        base: proxyBase.origin,
+        pathname: `${proxyPath}/v1/dev_browser/init`,
+        search: `origin=${origin}&redirect=${redirect}`,
+      };
+    }
+
+    return {
+      base: fapiOrigin,
+      pathname: '/v1/dev_browser/init',
+      search: `origin=${origin}&redirect=${redirect}`,
+    };
+  }
+
   // location.host != *.[lcl.dev](http://lcl.dev)
   async function setThirdPartyCookieForDevBrowser(): Promise<void> {
     const fapiOrigin = `https://${frontendApi}`;
-    const origin = window.location.origin;
-    const redirect = window.location.href;
-    const src = buildURL(
-      {
-        base: fapiOrigin,
-        pathname: '/v1/dev_browser/init',
-        search: `origin=${origin}&redirect=${redirect}`,
-      },
-      {
-        stringify: true,
-      },
-    );
+
+    const params = getBuildUrlArgs({
+      fapiOrigin,
+      proxyUrl,
+    });
+
+    const src = buildURL(params, {
+      stringify: true,
+    });
 
     try {
       const { browserToken } = await runIframe<{ browserToken: string }>({

@@ -937,11 +937,13 @@ export default class Clerk implements ClerkInterface {
   };
 
   #loadInStandardBrowser = async (): Promise<void> => {
+    console.log('----- loading in standard Broswer');
     this.#authService = new AuthenticationService(this);
     this.#pageLifecycle = createPageLifecycle();
 
     this.#devBrowserHandler = createDevBrowserHandler({
       frontendApi: this.frontendApi,
+      proxyUrl: this.proxyUrl,
       fapiClient: this.#fapiClient,
     });
 
@@ -952,6 +954,7 @@ export default class Clerk implements ClerkInterface {
     if (this.#instanceType === 'production') {
       await this.#devBrowserHandler.clear();
     } else {
+      console.log('----- setting up dev handler');
       await this.#devBrowserHandler.setup();
     }
 
