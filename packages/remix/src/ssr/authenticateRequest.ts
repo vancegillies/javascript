@@ -6,13 +6,19 @@ import { getEnvVariable } from '../utils';
 import type { LoaderFunctionArgs, RootAuthLoaderOptions, RootAuthLoaderOptionsWithExperimental } from './types';
 import { parseCookies } from './utils';
 
+const handleIsSatelliteBooleanOrFn = (opts: RootAuthLoaderOptionsWithExperimental, url: URL) => {
+  if (typeof opts.isSatellite === 'function') {
+    return opts.isSatellite(url);
+  }
+  return opts.isSatellite;
+};
+
 /**
  * @internal
  */
 export function authenticateRequest(args: LoaderFunctionArgs, opts: RootAuthLoaderOptions = {}): Promise<RequestState> {
   const { request, context } = args;
-  const { loadSession, loadUser, loadOrganization, authorizedParties, isSatellite } =
-    opts as RootAuthLoaderOptionsWithExperimental;
+  const { loadSession, loadUser, loadOrganization, authorizedParties } = opts as RootAuthLoaderOptionsWithExperimental;
 
   // Fetch environment variables across Remix runtimes.
   // 1. First try from process.env if exists (Node).
@@ -41,7 +47,17 @@ export function authenticateRequest(args: LoaderFunctionArgs, opts: RootAuthLoad
     (opts as RootAuthLoaderOptionsWithExperimental).domain ||
     '';
 
-  const proxyUrl = getEnvVariable('CLERK_PROXY_URL') || (context?.CLERK_PROXY_URL as string) || opts.proxyUrl || '';
+  const isSatellite =
+    getEnvVariable('CLERK_IS_SATELLITE') === 'true' ||
+    (context?.CLERK_IS_SATELLITE as string) === 'true' ||
+    handleIsSatelliteBooleanOrFn(opts, new URL(request.url)) ||
+    false;
+
+  const proxyUrl =
+    getEnvVariable('CLERK_PROXY_URL') ||
+    (context?.CLERK_PROXY_URL as string) ||
+    (opts as RootAuthLoaderOptionsWithExperimental).proxyUrl ||
+    '';
 
   const { headers } = request;
   const cookies = parseCookies(request);

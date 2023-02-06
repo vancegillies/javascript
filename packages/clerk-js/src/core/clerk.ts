@@ -975,7 +975,12 @@ export default class Clerk implements ClerkInterface {
     return false;
   };
 
-  #shouldSyncWithPrimary = () => this.#options.isSatellite && this.#handleSyncedQueryParam();
+  #shouldSyncWithPrimary = () => {
+    if (typeof this.#options.isSatellite === 'function') {
+      return this.#options.isSatellite(new URL(window.location.href)) && this.#handleSyncedQueryParam();
+    }
+    return this.#options.isSatellite && this.#handleSyncedQueryParam();
+  };
 
   #loadInStandardBrowser = async (): Promise<boolean> => {
     if (this.#shouldSyncWithPrimary()) {
