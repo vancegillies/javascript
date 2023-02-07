@@ -7,8 +7,7 @@ console.log('Create email');
 const emailAddressId = 'idn_23eTZpjqKYgn6qijHVXw0veiOgB';
 const fromEmailName = 'sales';
 const subject = 'Amazing offer!';
-const body =
-  'Click <a href="https://www.thisiswhyimbroke.com/">here</a> to find out more!';
+const body = 'Click <a href="https://www.thisiswhyimbroke.com/">here</a> to find out more!';
 
 try {
   const email = await emails.createEmail({

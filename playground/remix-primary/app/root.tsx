@@ -13,7 +13,7 @@ export const loader: LoaderFunction = args => {
 
       return { user };
     },
-    { loadUser: true, isSatellite: true, domain: 'clerk.satellite.dev' },
+    { loadUser: true, proxyUrl: 'https://primary.dev/api/__clerk' },
   );
 };
 
@@ -43,6 +43,5 @@ function App() {
 }
 
 export default ClerkApp(App, {
-  isSatellite: true,
-  domain: 'clerk.satellite.dev',
+  proxyUrl: 'https://primary.dev/api/__clerk',
 });

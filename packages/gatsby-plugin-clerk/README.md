@@ -133,7 +133,6 @@ Importing `'gatsby-plugin-clerk/api'` gives acces to all the exports coming from
 ```ts
 import { clerkClient, withAuth } from 'gatsby-plugin-clerk/api';
 
-
 const handler = withAuth(async (req, res) => {
   const users = await clerkClient.users.getUserList();
   res.send({ title: `We have ${users.length} users`, auth: req.auth });

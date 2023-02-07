@@ -23,22 +23,14 @@ declare global {
 }
 
 // with-auth path uses lax middleware
-app.get(
-  '/with-auth',
-  ClerkExpressWithAuth(),
-  (req: WithAuthProp<Request>, res: Response) => {
-    res.json(req.auth);
-  }
-);
+app.get('/with-auth', ClerkExpressWithAuth(), (req: WithAuthProp<Request>, res: Response) => {
+  res.json(req.auth);
+});
 
 // /require-auth path uses strict middleware
-app.get(
-  '/require-auth',
-  ClerkExpressRequireAuth(),
-  (req: RequireAuthProp<Request>, res) => {
-    res.json(req.auth);
-  }
-);
+app.get('/require-auth', ClerkExpressRequireAuth(), (req: RequireAuthProp<Request>, res) => {
+  res.json(req.auth);
+});
 
 // @ts-ignore
 app.use((err, req, res, next) => {

@@ -11,8 +11,7 @@ const organization = await organizations.createOrganization({
 console.log(organization);
 
 console.log('Update organization metadata');
-const updatedOrganizationMetadata =
-  await organizations.updateOrganizationMetadata(organization.id, {
-    publicMetadata: { test: 1 },
-  });
+const updatedOrganizationMetadata = await organizations.updateOrganizationMetadata(organization.id, {
+  publicMetadata: { test: 1 },
+});
 console.log(updatedOrganizationMetadata);

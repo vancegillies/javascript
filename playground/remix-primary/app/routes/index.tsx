@@ -1,31 +1,18 @@
 import type { LoaderFunction } from '@remix-run/node';
 import { getAuth } from '@clerk/remix/ssr.server';
-import { useUser, ClerkLoaded, SignedIn, SignedOut } from '@clerk/remix';
-import { useLoaderData } from '@remix-run/react';
+import { useUser, ClerkLoaded, SignedIn, SignedOut, SignIn } from '@clerk/remix';
 
 export const loader: LoaderFunction = async args => {
-  const url = new URL(args.request.url);
-  url.searchParams.delete('__clerk_synced');
-  return {
-    ...(await getAuth(args, {
-      isSatellite: true,
-      domain: 'clerk.satellite.dev',
-    })),
-    url,
-  };
+  return getAuth(args);
 };
 
 export default function Index() {
   const user = useUser();
-  const { url, userId } = useLoaderData();
   console.log('User:', user);
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', lineHeight: '1.4' }}>
       <h1>Welcome to Remix</h1>
-      <SignedOut>
-        <a href={`https://primary.dev/sign-in?redirect_url=${url}`}>Sign In to primary</a>
-      </SignedOut>
-
+      <SignIn />
       <ul>
         <li>
           <a

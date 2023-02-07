@@ -3,11 +3,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import {
-  ClerkExpressRequireAuth,
-  StrictAuthProp,
-  WithAuthProp,
-} from '@clerk/clerk-sdk-node';
+import { ClerkExpressRequireAuth, StrictAuthProp, WithAuthProp } from '@clerk/clerk-sdk-node';
 import express, { Application, Request, Response } from 'express';
 
 const port = process.env.PORT || 3000;
