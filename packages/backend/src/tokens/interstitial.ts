@@ -23,15 +23,8 @@ export type LoadInterstitialOptions = {
 export function loadInterstitialFromLocal(
   options: Omit<LoadInterstitialOptions, 'apiUrl' | 'isSatellite' | 'domain' | 'proxyUrl'>,
 ) {
-  const {
-    debugData,
-    frontendApi,
-    pkgVersion,
-    publishableKey,
-    proxyUrl,
-    isSatellite = false,
-    domain,
-  } = options as LoadInterstitialOptions;
+  const { debugData, frontendApi, pkgVersion, publishableKey, proxyUrl, isSatellite, domain } =
+    options as LoadInterstitialOptions;
   return `
     <head>
         <meta charset="UTF-8" />
@@ -66,7 +59,7 @@ export function loadInterstitialFromLocal(
                 try {
                     await Clerk.load({
                         isSatellite: ${isSatellite},
-                        shouldSyncLink: ${debugData?.reason !== 'satellite-cookie-missing'},
+                        shouldSyncLink: ${isSatellite && debugData?.reason !== 'satellite-cookie-missing'},
                     });
                     if(Clerk.loaded){
                       if(window.location.href.indexOf("#") === -1){
