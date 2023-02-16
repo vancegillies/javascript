@@ -28,6 +28,8 @@
     "build:stats": "npm run build --json > stats.json",
     "bundlewatch": "bundlewatch",
     "build:bundle": "webpack --config webpack.dev.js --env production",
+    "build:wow": "webpack --config webpack.dev.js --env production --json > stats.json",
+    "analyze": "webpack-bundle-analyzer stats.json",
     "build:declarations": "tsc -p tsconfig.declarations.json",
     "dev": "webpack serve --config webpack.dev.js",
     "clean": "rimraf ./dist",
@@ -105,7 +107,7 @@
     "typescript": "*",
     "webpack": "^5.72.1",
     "webpack-bundle-analyzer": "^4.5.0",
-    "webpack-cli": "^4.9.2",
+    "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.9.0",
     "webpack-merge": "^5.8.0"
   },

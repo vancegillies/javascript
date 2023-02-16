@@ -154,6 +154,10 @@ export default class IsomorphicClerk {
           scriptVariant: this.options.clerkJSVariant,
         });
 
+        await new Promise(resolve => {
+          setTimeout(resolve, 10000);
+        });
+
         if (!global.Clerk) {
           throw new Error('Failed to download latest ClerkJS. Contact support@clerk.dev.');
         }

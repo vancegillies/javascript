@@ -1,9 +1,6 @@
 import 'regenerator-runtime/runtime';
 
 import Clerk from './core/clerk';
-import { mountComponentRenderer } from './ui';
-
-Clerk.mountComponentRenderer = mountComponentRenderer;
 
 const publishableKey =
   document.querySelector('script[data-clerk-publishable-key]')?.getAttribute('data-clerk-publishable-key') ||
@@ -23,10 +20,21 @@ const proxyUrl =
 const domain =
   document.querySelector('script[data-clerk-domain]')?.getAttribute('data-clerk-domain') || window.__clerk_domain || '';
 
-window.Clerk = new Clerk(publishableKey || frontendApi, {
-  proxyUrl,
-  domain,
-});
+async function loadMountComponentRenderer() {
+  Clerk.mountComponentRenderer = await import(/* webpackChunkName: "ui-mountComponentRenderer" */ './ui').then(
+    m => m.mountComponentRenderer,
+  );
+}
+
+loadMountComponentRenderer()
+  .then(
+    () =>
+      (window.Clerk = new Clerk(publishableKey || frontendApi, {
+        proxyUrl,
+        domain,
+      })),
+  )
+  .catch(() => console.error('Failed to load Clerk'));
 
 if (module.hot) {
   module.hot.accept();

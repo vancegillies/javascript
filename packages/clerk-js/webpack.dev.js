@@ -33,9 +33,13 @@ const getProductionConfig = (mode = 'production') => {
     module: {
       rules: [loadSvgs, tsLoaderProd],
     },
+    experiments: {
+      topLevelAwait: true,
+    },
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: '[name].js',
+      chunkFilename: '[name].chunk.bundle.js',
       libraryTarget: 'umd',
       globalObject: 'globalThis',
     },
@@ -54,6 +58,9 @@ const getDevelopmentConfig = (mode = 'development', env) => {
     entry: './src/index.browser.ts',
     module: {
       rules: [loadSvgs, tsLoaderDev],
+    },
+    experiments: {
+      topLevelAwait: true,
     },
     ...devServerOutput,
   };
