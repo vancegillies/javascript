@@ -5,7 +5,7 @@ const ClerkQueryParams = [
   '__clerk_created_session',
   '__clerk_invitation_token',
   '__clerk_ticket',
-  '__clerk_modal_state',
+  '__clerk_redirect_state',
   CLERK_SYNCED,
 ] as const;
 
@@ -16,7 +16,7 @@ type ClerkQueryParamsToValuesMap = {
   __clerk_created_session: string;
   __clerk_invitation_token: string;
   __clerk_ticket: string;
-  __clerk_modal_state: string;
+  __clerk_redirect_state: string;
   __clerk_synced: string;
 };
 

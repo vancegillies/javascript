@@ -163,7 +163,7 @@ const Components = (props: ComponentsProps) => {
     if (decodedRedirectParams) {
       setState(s => ({
         ...s,
-        [componentNodes[decodedRedirectParams.componentName]]: true,
+        [componentNodes[decodedRedirectParams.componentName]]: decodedRedirectParams.modal,
       }));
     }
 
