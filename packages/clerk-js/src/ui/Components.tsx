@@ -96,7 +96,6 @@ export const mountComponentRenderer = (clerk: Clerk, environment: EnvironmentRes
 
   const mountComponentControls = () => {
     const deferredPromise = createDeferredPromise();
-    console.log('will load createroot');
     return import(/* webpackChunkName: "ReactDOM" */ 'react-dom/client').then(({ createRoot }) => {
       createRoot(clerkRoot!).render(
         <Components
