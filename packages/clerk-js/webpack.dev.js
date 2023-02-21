@@ -5,6 +5,8 @@ const path = require('path');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const ReactRefreshTypeScript = require('react-refresh-typescript');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const crypto = require('crypto');
+const hash = crypto.createHash('sha1').update(packageJSON.version).digest('hex');
 
 module.exports = env => {
   const mode = env.production ? 'production' : 'development';
@@ -18,6 +20,19 @@ module.exports = env => {
     },
     ...(isProduction ? getProductionConfig(mode, env) : getDevelopmentConfig(mode, env)),
   };
+};
+
+const cacheGroups = {
+  reactDomVendor: {
+    test: /[\\/]node_modules[\\/](react-dom)[\\/]/,
+    name: 'vendor-react-dom',
+    chunks: 'all',
+  },
+  floatUiVendor: {
+    test: /[\\/]node_modules[\\/](@floating-ui)[\\/]/,
+    name: 'vendor-floating-ui',
+    chunks: 'all',
+  },
 };
 
 const getProductionConfig = (mode = 'production', env) => {
@@ -35,21 +50,14 @@ const getProductionConfig = (mode = 'production', env) => {
     },
     output: {
       path: path.resolve(__dirname, 'dist'),
-      chunkFilename: '[name].chunk.js',
+      chunkFilename: `[id].${hash}.js`,
       filename: '[name].js',
       libraryTarget: 'umd',
       globalObject: 'globalThis',
     },
     optimization: {
       splitChunks: {
-        name: (module, chunks) => chunks.map(chunk => chunk.name).join('-'),
-        cacheGroups: {
-          reactDomVendor: {
-            test: /[\\/]node_modules[\\/](react-dom)[\\/]/,
-            name: 'vendor-react-dom',
-            chunks: 'all',
-          },
-        },
+        cacheGroups,
       },
     },
   };
@@ -68,6 +76,12 @@ const getDevelopmentConfig = (mode = 'development', env) => {
       rules: [loadSvgs, tsLoaderDev],
     },
     ...devServerOutput,
+    optimization: {
+      splitChunks: {
+        name: (module, chunks) => chunks.map(chunk => chunk.name).join('-'),
+        cacheGroups,
+      },
+    },
   };
 };
 
@@ -123,6 +137,7 @@ const devServerOutput = {
     crossOriginLoading: 'anonymous',
     filename: 'clerk.browser.js',
     libraryTarget: 'umd',
+    chunkFilename: '[name].chunk.js',
   },
   devServer: {
     // https: true,
