@@ -568,11 +568,7 @@ export default class Clerk implements ClerkInterface {
         return clerkMissingDevBrowserJwt();
       }
 
-      toURL.hash = setSearchParameterInHash({
-        hash: toURL.hash,
-        paramName: DEV_BROWSER_SSO_JWT_PARAMETER,
-        paramValue: devBrowserJwt,
-      });
+      toURL.searchParams.append(DEV_BROWSER_SSO_JWT_PARAMETER, devBrowserJwt);
     }
 
     return toURL.href;
