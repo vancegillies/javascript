@@ -271,7 +271,7 @@ export function setSearchParameterInHash({
   const dummyUrlForHash = new URL(h, DUMMY_URL_BASE);
   dummyUrlForHash.searchParams.set(paramName, paramValue);
 
-  // The following line will prepend the hash with a `/` if trailingSlash is true.
+  // The following line will prepend the hash with a `/`.
   // This is required for ClerkJS Components Hash router to work as expected
   // as it treats the hash as sub-path with its nested querystring parameters.
   return dummyUrlForHash.href.replace(DUMMY_URL_BASE, '');
@@ -290,7 +290,7 @@ export function removeSearchParameterFromHash({
   const dummyUrlForHash = new URL(h, DUMMY_URL_BASE);
   dummyUrlForHash.searchParams.delete(paramName);
 
-  // The following line will prepend the hash with a `/` if trailingSlash is true.
+  // The following line will prepend the hash with a `/` if removeTrailingSlash is false(default).
   // This is required for ClerkJS Components Hash router to work as expected
   // as it treats the hash as sub-path with its nested querystring parameters.
   return dummyUrlForHash.href.replace(`${DUMMY_URL_BASE}${removeTrailingSlash ? '/' : ''}`, '');
