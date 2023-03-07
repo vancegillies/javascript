@@ -1,12 +1,11 @@
+import { buildURL, createCookieHandler, isDevOrStagingUrl, runIframe } from '../utils';
 import {
-  buildURL,
-  createCookieHandler,
-  getSearchParameterFromHash,
-  isDevOrStagingUrl,
-  removeSearchParameterFromHash,
-  runIframe,
-} from '../utils';
-import { DEV_BROWSER_SSO_JWT_HTTP_HEADER, DEV_BROWSER_SSO_JWT_KEY, DEV_BROWSER_SSO_JWT_PARAMETER } from './constants';
+  DEV_BROWSER_SSO_JWT_HTTP_HEADER,
+  DEV_BROWSER_SSO_JWT_KEY,
+  DEV_BROWSER_SSO_JWT_PARAMETER,
+  DEV_BROWSER_SSO_JWT_PARAMETER_SEPARATOR,
+  DEV_BROWSER_SSO_JWT_PARAMETER_WITH_HASH_SEPARATOR,
+} from './constants';
 import { clerkErrorDevInitFailed } from './errors';
 import type { FapiClient } from './fapiClient';
 
@@ -107,21 +106,19 @@ export default function createDevBrowserHandler({
 
   async function setUrlBasedSessionSyncBrowser(): Promise<void> {
     // 1. Get the JWT from hash search parameters when the redirection comes from Clerk Hosted Pages
-    const devBrowserToken = getSearchParameterFromHash({
-      hash: window.location.hash,
-      paramName: DEV_BROWSER_SSO_JWT_PARAMETER,
-    });
+    let preExistingHash = true;
+    let arr = window.location.hash.split(DEV_BROWSER_SSO_JWT_PARAMETER_WITH_HASH_SEPARATOR);
+    if (arr.length === 1) {
+      preExistingHash = false;
+      arr = window.location.hash.split(DEV_BROWSER_SSO_JWT_PARAMETER_SEPARATOR);
+    }
+    const devBrowserToken = arr.length > 1 ? arr[1] : undefined;
 
     if (devBrowserToken) {
-      window.location.hash = removeSearchParameterFromHash({
-        hash: window.location.hash,
-        paramName: DEV_BROWSER_SSO_JWT_PARAMETER,
-        removeTrailingSlash: true,
-      });
-      if (!window.location.hash) {
-        history.replaceState(null, '', window.location.href.replace('#', ''));
+      window.location.hash = window.location.hash.split(DEV_BROWSER_SSO_JWT_PARAMETER_SEPARATOR)[0];
+      if (!preExistingHash) {
+        window.location.href = window.location.href.replace('#', '');
       }
-
       setDevBrowserJWT(devBrowserToken);
       return;
     }

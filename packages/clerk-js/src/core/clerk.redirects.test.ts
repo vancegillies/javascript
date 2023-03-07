@@ -206,7 +206,7 @@ describe('Clerk singleton - Redirects', () => {
         await clerkForDevelopmentInstance.redirectToSignIn({ redirectUrl: 'https://www.example.com/' });
         expect(mockHref).toHaveBeenNthCalledWith(
           2,
-          'http://another-test.host/sign-in#/?redirect_url=https%3A%2F%2Fwww.example.com%2F&__dev_session=db_deadbeef',
+          'http://another-test.host/sign-in#/?redirect_url=https%3A%2F%2Fwww.example.com%2F*^**db_deadbeef',
         );
       });
 
@@ -220,7 +220,7 @@ describe('Clerk singleton - Redirects', () => {
         await clerkForDevelopmentInstance.redirectToSignUp({ redirectUrl: 'https://www.example.com/' });
         expect(mockHref).toHaveBeenNthCalledWith(
           2,
-          'http://another-test.host/sign-up#/?redirect_url=https%3A%2F%2Fwww.example.com%2F&__dev_session=db_deadbeef',
+          'http://another-test.host/sign-up#/?redirect_url=https%3A%2F%2Fwww.example.com%2F*^**db_deadbeef',
         );
       });
 
@@ -229,10 +229,7 @@ describe('Clerk singleton - Redirects', () => {
         expect(mockHref).toHaveBeenNthCalledWith(1, 'http://another-test.host/user-profile');
 
         await clerkForDevelopmentInstance.redirectToUserProfile();
-        expect(mockHref).toHaveBeenNthCalledWith(
-          2,
-          'http://another-test.host/user-profile#/?__dev_session=db_deadbeef',
-        );
+        expect(mockHref).toHaveBeenNthCalledWith(2, 'http://another-test.host/user-profile#*^*db_deadbeef');
       });
 
       it('redirects to home', async () => {
@@ -240,7 +237,7 @@ describe('Clerk singleton - Redirects', () => {
         expect(mockHref).toHaveBeenNthCalledWith(1, 'http://another-test.host/home');
 
         await clerkForDevelopmentInstance.redirectToHome();
-        expect(mockHref).toHaveBeenNthCalledWith(2, 'http://another-test.host/home#/?__dev_session=db_deadbeef');
+        expect(mockHref).toHaveBeenNthCalledWith(2, 'http://another-test.host/home#*^*db_deadbeef');
       });
 
       it('redirects to create organization', async () => {
@@ -248,10 +245,7 @@ describe('Clerk singleton - Redirects', () => {
         expect(mockHref).toHaveBeenNthCalledWith(1, 'http://another-test.host/create-organization');
 
         await clerkForDevelopmentInstance.redirectToCreateOrganization();
-        expect(mockHref).toHaveBeenNthCalledWith(
-          2,
-          'http://another-test.host/create-organization#/?__dev_session=db_deadbeef',
-        );
+        expect(mockHref).toHaveBeenNthCalledWith(2, 'http://another-test.host/create-organization#*^*db_deadbeef');
       });
 
       it('redirects to organization profile', async () => {
@@ -259,10 +253,7 @@ describe('Clerk singleton - Redirects', () => {
         expect(mockHref).toHaveBeenNthCalledWith(1, 'http://another-test.host/organization-profile');
 
         await clerkForDevelopmentInstance.redirectToOrganizationProfile();
-        expect(mockHref).toHaveBeenNthCalledWith(
-          2,
-          'http://another-test.host/organization-profile#/?__dev_session=db_deadbeef',
-        );
+        expect(mockHref).toHaveBeenNthCalledWith(2, 'http://another-test.host/organization-profile#*^*db_deadbeef');
       });
     });
   });
@@ -286,7 +277,7 @@ describe('Clerk singleton - Redirects', () => {
         });
       });
 
-      it('redirects to the provided url without __dev_session in the url', async () => {
+      it('redirects to the provided url without dev session jwt in the url', async () => {
         await clerkForProductionInstance.redirectWithAuth('https://app.example.com');
         expect(mockHref).toHaveBeenNthCalledWith(1, 'https://app.example.com/');
 
@@ -310,12 +301,12 @@ describe('Clerk singleton - Redirects', () => {
         });
       });
 
-      it('redirects to the provided url with __dev_session in the url', async () => {
+      it('redirects to the provided url with dev session jwt in the url', async () => {
         await clerkForProductionInstance.redirectWithAuth('https://app.example.com');
         expect(mockHref).toHaveBeenNthCalledWith(1, 'https://app.example.com/');
 
         await clerkForDevelopmentInstance.redirectWithAuth('https://app.example.com');
-        expect(mockHref).toHaveBeenNthCalledWith(2, 'https://app.example.com/#/?__dev_session=db_deadbeef');
+        expect(mockHref).toHaveBeenNthCalledWith(2, 'https://app.example.com/#*^*db_deadbeef');
       });
     });
   });

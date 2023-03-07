@@ -69,13 +69,17 @@ import {
   noUserExists,
   removeClerkQueryParam,
   sessionExistsAndSingleSessionModeEnabled,
-  setSearchParameterInHash,
   stripOrigin,
   validateFrontendApi,
   windowNavigate,
 } from '../utils';
 import { memoizeListenerCallback } from '../utils/memoizeStateListenerCallback';
-import { CLERK_SYNCED, DEV_BROWSER_SSO_JWT_PARAMETER, ERROR_CODES } from './constants';
+import {
+  CLERK_SYNCED,
+  DEV_BROWSER_SSO_JWT_PARAMETER_SEPARATOR,
+  DEV_BROWSER_SSO_JWT_PARAMETER_WITH_HASH_SEPARATOR,
+  ERROR_CODES,
+} from './constants';
 import type { DevBrowserHandler } from './devBrowserHandler';
 import createDevBrowserHandler from './devBrowserHandler';
 import {
@@ -559,23 +563,23 @@ export default class Clerk implements ClerkInterface {
     if (this.#instanceType === 'production' || !this.#devBrowserHandler?.usesUrlBasedSessionSync()) {
       return to;
     }
+    let href = to;
 
     const toURL = new URL(to, window.location.href);
-
     if (toURL.origin !== window.location.origin) {
       const devBrowserJwt = this.#devBrowserHandler?.getDevBrowserJWT();
       if (!devBrowserJwt) {
         return clerkMissingDevBrowserJwt();
       }
 
-      toURL.hash = setSearchParameterInHash({
-        hash: toURL.hash,
-        paramName: DEV_BROWSER_SSO_JWT_PARAMETER,
-        paramValue: devBrowserJwt,
-      });
+      href =
+        href +
+        (href.includes('#')
+          ? `${DEV_BROWSER_SSO_JWT_PARAMETER_WITH_HASH_SEPARATOR}${devBrowserJwt}`
+          : `#${DEV_BROWSER_SSO_JWT_PARAMETER_SEPARATOR}${devBrowserJwt}`);
     }
 
-    return toURL.href;
+    return href;
   }
 
   public buildSignInUrl(options?: RedirectOptions): string {
