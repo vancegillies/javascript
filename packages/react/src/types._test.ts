@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
+import type { DomainOrProxyUrl } from '@clerk/types';
+
 import type { IsomorphicClerkOptions } from './types';
 
 // @ts-ignore
@@ -87,3 +89,25 @@ props = {
   publishableKey: '',
   proxyUrl: '',
 };
+
+// @ts-ignore
+let props2: DomainOrProxyUrl;
+
+// @ts-expect-error
+props2 = {
+  domain: '',
+  proxyUrl: '',
+};
+
+// @ts-expect-no-error
+props2 = {
+  proxyUrl: '',
+};
+
+// @ts-expect-no-error
+props2 = {
+  domain: '',
+};
+
+// @ts-expect-no-error
+props2 = {};
