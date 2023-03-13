@@ -10,3 +10,4 @@ export { ERROR_CODES } from '../ui/common/constants';
 
 export const CLERK_MODAL_STATE = '__clerk_modal_state';
 export const CLERK_SYNCED = '__clerk_synced';
+export const CLERK_SYNCING = '__clerk_syncing';

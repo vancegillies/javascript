@@ -75,13 +75,14 @@ import {
   windowNavigate,
 } from '../utils';
 import { memoizeListenerCallback } from '../utils/memoizeStateListenerCallback';
-import { CLERK_SYNCED, DEV_BROWSER_SSO_JWT_PARAMETER, ERROR_CODES } from './constants';
+import { CLERK_SYNCED, CLERK_SYNCING, DEV_BROWSER_SSO_JWT_PARAMETER, ERROR_CODES } from './constants';
 import type { DevBrowserHandler } from './devBrowserHandler';
 import createDevBrowserHandler from './devBrowserHandler';
 import {
   clerkErrorInitFailed,
   clerkMissingDevBrowserJwt,
   clerkMissingProxyUrlAndDomain,
+  clerkMissingSignInUrlAsSatellite,
   clerkOAuthCallbackDidNotCompleteSignInSIgnUp,
 } from './errors';
 import { eventBus, events } from './events';
@@ -116,6 +117,7 @@ const defaultOptions: ClerkOptions = {
   standardBrowser: true,
   touchSession: true,
   isSatellite: false,
+  signInUrl: undefined,
 };
 
 export default class Clerk implements ClerkInterface {
@@ -966,6 +968,7 @@ export default class Clerk implements ClerkInterface {
   };
 
   #hasJustSynced = () => getClerkQueryParam(CLERK_SYNCED) === 'true';
+  #needsSyncing = () => getClerkQueryParam(CLERK_SYNCING) === 'true';
 
   #clearJustSynced = () => removeClerkQueryParam(CLERK_SYNCED);
 
@@ -991,11 +994,6 @@ export default class Clerk implements ClerkInterface {
       return false;
     }
 
-    if (this.#hasJustSynced()) {
-      this.#clearJustSynced();
-      return false;
-    }
-
     const cookieHandler = createCookieHandler();
     return cookieHandler.getClientUatCookie() <= 0;
   };
@@ -1004,8 +1002,70 @@ export default class Clerk implements ClerkInterface {
     await this.navigate(this.#buildPrimarySyncUrl());
   };
 
+  #shouldSyncWithPrimaryDev = (): boolean => {
+    if (!this.isSatellite || this.#instanceType === 'production') {
+      return false;
+    }
+
+    if (this.isSatellite && !this.#options.signInUrl && this.#instanceType === 'development') {
+      clerkMissingSignInUrlAsSatellite();
+      return false;
+    }
+
+    return true;
+  };
+
+  #syncWithPrimaryDev = async () => {
+    await this.navigate(this.#buildPrimarySyncUrlDev());
+  };
+
+  #buildPrimarySyncUrlDev = (): string => {
+    const primarySyncUrl = new URL(`/`, this.#options.signInUrl);
+    primarySyncUrl?.searchParams.append(CLERK_SYNCING, 'true');
+    primarySyncUrl?.searchParams.append('redirect_url', window.location.href);
+
+    return primarySyncUrl?.toString() || '';
+  };
+
+  #shouldRedirectToSatelliteDev = (): boolean => {
+    if (this.isSatellite) {
+      return false;
+    }
+
+    if (this.#needsSyncing()) {
+      return true;
+    }
+
+    return false;
+  };
+
+  #redirectToSatelliteDev = async () => {
+    await this.redirectWithAuth(this.#buildReturnSatelliteUrlDev());
+  };
+
+  #buildReturnSatelliteUrlDev = (): string => {
+    const redirectUrl = new URL(window.location.href).searchParams.get('redirect_url') as string;
+    const primarySyncUrl = new URL(`/`, redirectUrl);
+    primarySyncUrl?.searchParams.append(CLERK_SYNCED, 'true');
+
+    return primarySyncUrl?.toString() || '';
+  };
+
   #loadInStandardBrowser = async (): Promise<boolean> => {
-    if (this.#shouldSyncWithPrimary()) {
+    this.#devBrowserHandler = createDevBrowserHandler({
+      frontendApi: this.frontendApi,
+      fapiClient: this.#fapiClient,
+    });
+
+    if (this.#hasJustSynced()) {
+      this.#clearJustSynced();
+    } else if (this.#shouldSyncWithPrimaryDev()) {
+      await this.#syncWithPrimaryDev();
+      return false;
+    } else if (this.#shouldRedirectToSatelliteDev()) {
+      await this.#redirectToSatelliteDev();
+      return false;
+    } else if (this.#shouldSyncWithPrimary()) {
       await this.#syncWithPrimary();
       // ClerkJS is not considered loaded during the sync/link process with the primary domain
       return false;
@@ -1013,11 +1073,6 @@ export default class Clerk implements ClerkInterface {
 
     this.#authService = new AuthenticationService(this);
     this.#pageLifecycle = createPageLifecycle();
-
-    this.#devBrowserHandler = createDevBrowserHandler({
-      frontendApi: this.frontendApi,
-      fapiClient: this.#fapiClient,
-    });
 
     this.#pageLifecycle = createPageLifecycle();
 
