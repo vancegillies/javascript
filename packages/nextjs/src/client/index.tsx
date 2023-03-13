@@ -43,6 +43,7 @@ export function ClerkProvider({ children, ...rest }: NextClerkProviderProps): JS
     __clerk_ssr_state,
     clerkJSUrl,
     __unstable_invokeMiddlewareOnAuthStateChange = true,
+    signInUrl,
     ...restProps
   } = rest;
   const { push } = useRouter();
@@ -71,6 +72,7 @@ export function ClerkProvider({ children, ...rest }: NextClerkProviderProps): JS
       domain={domain || process.env.NEXT_PUBLIC_CLERK_DOMAIN || ''}
       isSatellite={isSatellite || process.env.NEXT_PUBLIC_CLERK_IS_SATELLITE === 'true'}
       navigate={to => push(to)}
+      signInUrl={signInUrl || process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL}
       // withServerSideAuth automatically injects __clerk_ssr_state
       // getAuth returns a user-facing authServerSideProps that hides __clerk_ssr_state
       initialState={authServerSideProps?.__clerk_ssr_state || __clerk_ssr_state}
