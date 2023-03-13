@@ -5,6 +5,7 @@ import type { ClerkOptions } from '@clerk/types';
 import { json } from '@remix-run/server-runtime';
 import cookie from 'cookie';
 
+import { getEnvVariable } from '../utils';
 import type { LoaderFunctionArgs, LoaderFunctionArgsWithAuth } from './types';
 
 /**
@@ -95,6 +96,7 @@ export const interstitialJsonResponse = (requestState: RequestState, opts: { loa
 };
 
 export const injectRequestStateIntoResponse = async (response: Response, requestState: RequestState) => {
+  const signInUrl = getEnvVariable('CLERK_SIGN_IN_URL');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { reason, message, isSignedIn, isInterstitial, ...rest } = requestState;
   const clone = response.clone();
@@ -106,6 +108,7 @@ export const injectRequestStateIntoResponse = async (response: Response, request
     __proxyUrl: requestState.proxyUrl,
     __domain: requestState.domain,
     __isSatellite: requestState.isSatellite,
+    __signInUrl: signInUrl,
     __clerk_debug: debugRequestState(requestState),
   });
   // set the correct content-type header in case the user returned a `Response` directly
