@@ -557,7 +557,7 @@ export default class Clerk implements ClerkInterface {
     return await customNavigate(stripOrigin(toURL));
   };
 
-  public buildUrlWithAuth(to: string): string {
+  public buildUrlWithAuth(to: string, strict = true): string {
     if (this.#instanceType === 'production' || !this.#devBrowserHandler?.usesUrlBasedSessionSync()) {
       return to;
     }
@@ -566,15 +566,17 @@ export default class Clerk implements ClerkInterface {
 
     if (toURL.origin !== window.location.origin) {
       const devBrowserJwt = this.#devBrowserHandler?.getDevBrowserJWT();
-      if (!devBrowserJwt) {
+      if (!devBrowserJwt && strict) {
         return clerkMissingDevBrowserJwt();
       }
 
-      toURL.hash = setSearchParameterInHash({
-        hash: toURL.hash,
-        paramName: DEV_BROWSER_SSO_JWT_PARAMETER,
-        paramValue: devBrowserJwt,
-      });
+      if (devBrowserJwt) {
+        toURL.hash = setSearchParameterInHash({
+          hash: toURL.hash,
+          paramName: DEV_BROWSER_SSO_JWT_PARAMETER,
+          paramValue: devBrowserJwt,
+        });
+      }
     }
 
     return toURL.href;
@@ -631,6 +633,16 @@ export default class Clerk implements ClerkInterface {
     }
     return this.buildUrlWithAuth(this.#environment.displayConfig.organizationProfileUrl);
   }
+
+  public redirectToSatellite = async (): Promise<unknown> => {
+    const redirectUrl = new URL(window.location.href).searchParams.get('redirect_url') as string;
+    const primarySyncUrl = new URL(`/`, redirectUrl);
+    primarySyncUrl.searchParams.append(CLERK_SYNCED, 'true');
+
+    if (inBrowser()) {
+      return this.navigate(this.buildUrlWithAuth(primarySyncUrl.toString(), false));
+    }
+  };
 
   public redirectWithAuth = async (to: string): Promise<unknown> => {
     if (inBrowser()) {
@@ -1039,18 +1051,6 @@ export default class Clerk implements ClerkInterface {
     return false;
   };
 
-  #redirectToSatelliteDev = async () => {
-    await this.redirectWithAuth(this.#buildReturnSatelliteUrlDev());
-  };
-
-  #buildReturnSatelliteUrlDev = (): string => {
-    const redirectUrl = new URL(window.location.href).searchParams.get('redirect_url') as string;
-    const primarySyncUrl = new URL(`/`, redirectUrl);
-    primarySyncUrl?.searchParams.append(CLERK_SYNCED, 'true');
-
-    return primarySyncUrl?.toString() || '';
-  };
-
   #loadInStandardBrowser = async (): Promise<boolean> => {
     this.#devBrowserHandler = createDevBrowserHandler({
       frontendApi: this.frontendApi,
@@ -1063,7 +1063,7 @@ export default class Clerk implements ClerkInterface {
       await this.#syncWithPrimaryDev();
       return false;
     } else if (this.#shouldRedirectToSatelliteDev()) {
-      await this.#redirectToSatelliteDev();
+      await this.redirectToSatellite();
       return false;
     } else if (this.#shouldSyncWithPrimary()) {
       await this.#syncWithPrimary();
