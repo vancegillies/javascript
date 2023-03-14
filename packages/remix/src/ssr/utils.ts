@@ -78,6 +78,7 @@ export const unknownResponse = (requestState: RequestState) => {
 };
 
 export const interstitialJsonResponse = (requestState: RequestState, opts: { loader: 'root' | 'nested' }) => {
+  const signInUrl = getEnvVariable('CLERK_SIGN_IN_URL');
   return json(
     wrapWithClerkState({
       __loader: opts.loader,
@@ -89,6 +90,7 @@ export const interstitialJsonResponse = (requestState: RequestState, opts: { loa
         proxyUrl: requestState.proxyUrl,
         isSatellite: requestState.isSatellite,
         domain: requestState.domain,
+        signInUrl: signInUrl,
       }),
     }),
     { status: 401, headers: οbservabilityHeadersFromRequestState(requestState) },
