@@ -1,5 +1,6 @@
 import { isLegacyFrontendApiKey, isPublishableKey } from '@clerk/shared';
 import type { InitialState } from '@clerk/types';
+import type { MultiDomainAndOrProxy } from '@clerk/types';
 import React from 'react';
 
 import { multipleClerkProvidersError } from '../errors';
@@ -12,10 +13,11 @@ __internal__setErrorThrowerOptions({
   packageName: '@clerk/clerk-react',
 });
 
-export type ClerkProviderProps = IsomorphicClerkOptions & {
-  children: React.ReactNode;
-  initialState?: InitialState;
-};
+export type ClerkProviderProps = Omit<IsomorphicClerkOptions, keyof MultiDomainAndOrProxy> &
+  MultiDomainAndOrProxy & {
+    children: React.ReactNode;
+    initialState?: InitialState;
+  };
 
 function ClerkProviderBase(props: ClerkProviderProps): JSX.Element {
   const { initialState, children, ...restIsomorphicClerkOptions } = props;
@@ -35,7 +37,7 @@ function ClerkProviderBase(props: ClerkProviderProps): JSX.Element {
     <StructureContext.Provider value={StructureContextStates.noGuarantees}>
       <ClerkContextProvider
         initialState={initialState}
-        isomorphicClerkOptions={restIsomorphicClerkOptions}
+        isomorphicClerkOptions={restIsomorphicClerkOptions as IsomorphicClerkOptions}
       >
         {children}
       </ClerkContextProvider>

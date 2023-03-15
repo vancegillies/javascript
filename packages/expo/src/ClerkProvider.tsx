@@ -23,7 +23,6 @@ export function ClerkProvider(props: ClerkProviderProps): JSX.Element {
     publishableKey || process.env.CLERK_PUBLISHABLE_KEY || frontendApi || process.env.CLERK_FRONTEND_API || '';
 
   return (
-    //@ts-expect-error
     <ClerkReactProvider
       {...rest}
       Clerk={buildClerk({ key, tokenCache })}
