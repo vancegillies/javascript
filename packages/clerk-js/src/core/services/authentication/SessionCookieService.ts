@@ -1,34 +1,32 @@
-import { runWithExponentialBackOff } from '@clerk/shared';
+import { isNetworkError, isUnauthorizedError } from '@clerk/shared';
 import type { Clerk, EnvironmentResource, SessionResource, TokenResource } from '@clerk/types';
 
 import type { CookieHandler } from '../../../utils';
 import { createCookieHandler, inBrowser } from '../../../utils';
 import { clerkCoreErrorTokenRefreshFailed } from '../../errors';
-import type { ClerkAPIResponseError } from '../../resources';
+import { eventBus, events } from '../../events';
 import { isClerkAPIResponseError } from '../../resources';
-import { AuthenticationPoller } from './AuthenticationPoller';
+import { SessionCookiePoller } from './SessionCookiePoller';
 
-type InitParams = {
-  environment: EnvironmentResource;
-  enablePolling?: boolean;
-};
-
-export class AuthenticationService {
-  private enablePolling = true;
+export class SessionCookieService {
   private cookies: CookieHandler = createCookieHandler();
   private environment: EnvironmentResource | undefined;
-  private poller: AuthenticationPoller | null = null;
+  private poller: SessionCookiePoller | null = null;
 
-  constructor(private clerk: Clerk) {}
+  constructor(private clerk: Clerk) {
+    // set cookie on token update
+    eventBus.on(events.TokenUpdate, ({ token }) => {
+      this.updateSessionCookie(token?.getRawString());
+    });
 
-  public async initAuth(opts: InitParams): Promise<void> {
-    this.enablePolling = opts.enablePolling ?? true;
-    this.environment = opts.environment;
-    await this.setAuthCookiesFromSession(this.clerk.session);
-    this.setClientUatCookieForDevelopmentInstances();
-    this.clearLegacyAuthV1Cookies();
-    this.startPollingForToken();
     this.refreshTokenOnVisibilityChange();
+    this.startPollingForToken();
+  }
+
+  public setEnvironment(environment: EnvironmentResource) {
+    this.environment = environment;
+    this.clearLegacyAuthV1Cookies();
+    this.setClientUatCookieForDevelopmentInstances();
   }
 
   public async setAuthCookiesFromSession(session: SessionResource | undefined | null): Promise<void> {
@@ -36,17 +34,9 @@ export class AuthenticationService {
     this.setClientUatCookieForDevelopmentInstances();
   }
 
-  public setAuthCookiesFromToken(token: string | undefined): void {
-    this.updateSessionCookie(token);
-    this.setClientUatCookieForDevelopmentInstances();
-  }
-
   private startPollingForToken() {
-    if (!this.enablePolling) {
-      return;
-    }
     if (!this.poller) {
-      this.poller = new AuthenticationPoller();
+      this.poller = new SessionCookiePoller();
     }
     this.poller.startPollingForSessionToken(() => this.refreshSessionToken());
   }
@@ -80,10 +70,7 @@ export class AuthenticationService {
   }
 
   private getNewToken() {
-    return runWithExponentialBackOff(() => this.clerk.session?.getToken(), {
-      shouldRetry: e => !this.isUnauthorizedError(e as any),
-      maxRetries: 8,
-    });
+    return this.clerk.session?.getToken();
   }
 
   private setSessionCookie(token: TokenResource | string) {
@@ -117,23 +104,11 @@ export class AuthenticationService {
 
   private handleGetTokenError(e: any) {
     if (isClerkAPIResponseError(e)) {
-      if (this.isUnauthorizedError(e) || this.isNetworkError(e)) {
+      if (isUnauthorizedError(e) || isNetworkError(e)) {
         return;
       }
       clerkCoreErrorTokenRefreshFailed(e.toString());
     }
     clerkCoreErrorTokenRefreshFailed(e.message || e);
-  }
-
-  private isUnauthorizedError(e: ClerkAPIResponseError) {
-    const status = e?.status;
-    const code = e?.errors?.[0]?.code;
-    return code === 'authentication_invalid' && status === 401;
-  }
-
-  private isNetworkError(e: any) {
-    // TODO: revise during error handling epic
-    const message = (`${e.message}${e.name}` || '').toLowerCase().replace(/\s+/g, '');
-    return message.includes('networkerror');
   }
 }
