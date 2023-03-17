@@ -30,11 +30,11 @@
   ],
   "scripts": {
     "prepublishOnly": "npm run build",
-    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsup --watch",
+    "build": "tsup --minify --env.NODE_ENV production",
     "clean": "rimraf ./dist",
     "lint": "eslint .",
-    "test": "jest",
-    "dev": "tsc -p tsconfig.build.json --watch"
+    "test": "jest"
   },
   "dependencies": {
     "@clerk/backend": "^0.13.2-staging.5",
@@ -50,6 +50,7 @@
     "jest": "*",
     "node-fetch-native": "^0.1.8",
     "ts-jest": "*",
+    "tsup": "^6.6.3",
     "typescript": "*"
   },
   "peerDependencies": {
